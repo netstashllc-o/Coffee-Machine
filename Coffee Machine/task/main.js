@@ -1,30 +1,85 @@
+'use strict';
 const input = require('sync-input');
-const ingredients = new Map(
-    [
-        ['water', {amount: 200, unit: 'ml'}],
-        ['milk', {amount: 50, unit: 'ml'}],
-        ['coffee beans', {amount: 15, unit: 'g'}]
-    ]
-);
 
-let waterAdded = Number(input("Write how many ml of water the coffee machine has:\n"));
-let milkAdded = Number(input("Write how many ml of milk the coffee machine has:\n"));
-let beansAdded = Number(input("Write how many grams of coffee beans the coffee machine has:\n"));
-let cupsNeeded = Number(input("Write how many cups of coffee you will need:\n"));
+const CoffeeMachine = class {
+    constructor(money, water, milk, beans, cups) {
+        this.money = money;
+        this.water = water;
+        this.milk = milk;
+        this.beans = beans;
+        this.cups = cups;
+    };
 
-let cupsPossible = Math.min(
-    Math.floor(waterAdded / ingredients.get('water').amount),
-    Math.floor(milkAdded / ingredients.get('milk').amount),
-    Math.floor(beansAdded / ingredients.get('coffee beans').amount)
-);
-
-if (cupsNeeded <= cupsPossible) {
-    let result = "Yes, I can make that amount of coffee";
-    let additionalCups = cupsPossible - cupsNeeded;
-    if (additionalCups > 0) {
-        result += ` (and even ${additionalCups} more than that)`;
+    buy(product) {
+        this.money += product.cost;
+        this.water -= product.water;
+        this.milk -= product.milk;
+        this.beans -= product.beans;
+        this.cups--;
     }
-    console.log(result);
-} else {
-    console.log(`No, I can make only ${cupsPossible} cups of coffee`);
+
+    fill() {
+        this.water += Number(input('Write how many ml of water you want to add:\n'));
+        this.milk += Number(input('Write how many ml of milk you want to add:\n'));
+        this.beans += Number(input('Write how many grams of coffee beans you want to add:\n'));
+        this.cups += Number(input('Write how many disposable cups you want to add:\n'));
+    }
+
+    take() {
+        console.log(`I gave you $${this.money}`);
+        this.money = 0;
+    }
+
+    status() {
+        return `The coffee machine has:
+${this.water} ml of water
+${this.milk} ml of milk
+${this.beans} g of coffee beans
+${this.cups} disposable cups
+$${this.money} of money
+`;
+    }
+};
+
+const CoffeeProduct = class {
+    constructor(water, milk, beans, cost) {
+        this.water = water;
+        this.milk = milk;
+        this.beans = beans;
+        this.cost = cost;
+    }
+};
+
+const machine = new CoffeeMachine(550, 400, 540, 120, 9);
+const espresso = new CoffeeProduct(250, 0, 16, 4);
+const latte = new CoffeeProduct(350, 75, 20, 7);
+const cappuccino = new CoffeeProduct(200, 100, 12, 6);
+const products = [null, espresso, latte, cappuccino];
+
+console.log(machine.status());
+let action = input("Write action (buy, fill, take):\n");
+
+switch (action) {
+    case "buy":
+        let option = input('What do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino:\n');
+        option = Number(option);
+        let product = products[option];
+        if (product === undefined) {
+            console.log("Unknown product!");
+            break;
+        }
+        machine.buy(product);
+        break;
+    case "fill":
+        machine.fill();
+        break;
+    case "take":
+        machine.take();
+        break;
+    default:
+        console.log("Unknown action!");
+        break;
 }
+
+console.log();
+console.log(machine.status());
