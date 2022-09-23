@@ -30,8 +30,30 @@ const CoffeeMachine = class {
         this.money = 0;
     }
 
+    verifyAndBuy(product) {
+        let message = "Sorry, not enough ";
+        if (this.water < product.water) {
+            return message + "water!";
+        }
+
+        if (this.milk < product.milk) {
+            return message + "milk!";
+        }
+
+        if (this.beans < product.beans) {
+            return message + "coffee beans!";
+        }
+
+        if (this.cups < product.cups) {
+            return message + "cups!";
+        }
+
+        this.buy(product);
+        return "I have enough resources, making you a coffee!";
+    }
+
     status() {
-        return `The coffee machine has:
+        return `\nThe coffee machine has:
 ${this.water} ml of water
 ${this.milk} ml of milk
 ${this.beans} g of coffee beans
@@ -55,31 +77,36 @@ const espresso = new CoffeeProduct(250, 0, 16, 4);
 const latte = new CoffeeProduct(350, 75, 20, 7);
 const cappuccino = new CoffeeProduct(200, 100, 12, 6);
 const products = [null, espresso, latte, cappuccino];
+let keepGoing = true;
 
-console.log(machine.status());
-let action = input("Write action (buy, fill, take):\n");
+do {
+    let action = input("Write action (buy, fill, take, remaining, exit):\n");
 
-switch (action) {
-    case "buy":
-        let option = input('What do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino:\n');
-        option = Number(option);
-        let product = products[option];
-        if (product === undefined) {
-            console.log("Unknown product!");
+    switch (action) {
+        case "buy":
+            let option = input('What do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino:\n');
+            option = Number(option);
+            let product = products[option];
+            if (product === undefined) {
+                console.log("Unknown product!");
+                break;
+            }
+            console.log(machine.verifyAndBuy(product));
             break;
-        }
-        machine.buy(product);
-        break;
-    case "fill":
-        machine.fill();
-        break;
-    case "take":
-        machine.take();
-        break;
-    default:
-        console.log("Unknown action!");
-        break;
-}
-
-console.log();
-console.log(machine.status());
+        case "fill":
+            machine.fill();
+            break;
+        case "take":
+            machine.take();
+            break;
+        case "remaining":
+            console.log(machine.status());
+            break;
+        case "exit":
+            keepGoing = false;
+            break;
+        default:
+            console.log("Unknown action!");
+            break;
+    }
+} while (keepGoing);
